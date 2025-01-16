@@ -43,10 +43,16 @@ class _UBDPageState extends State<UBDPage> {
 
   Future<int> _fetchLatestCBG() async {
     try {
-      var url =
-          "http://10.0.2.2:5000/conc_number"; // Change according to your Flask API
-      final response = await http.get(Uri.parse(url));
-
+      var url ="http://192.168.239.185:5001/predict"; // Change according to your Flask API
+      final response = await http.post(Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},  // Ensure you're sending JSON
+      body: json.encode({
+        'data': {
+             "input": [5.1, 3.5, 1.4, 0.2, 1, 0, 1, 8, 0]
+                }
+,  // Replace this with actual data you want to send
+      }),
+      );
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
         if (data['concentration_reading'] != null &&

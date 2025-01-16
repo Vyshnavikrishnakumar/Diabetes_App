@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:phase_1_app/utils/text.dart';
 import '../utils/config.dart';
@@ -70,10 +72,33 @@ class _LoginFormState extends State<LoginForm> {
           Button(
             width: double.infinity,
             title: 'Sign In',
-            onPressed: () {
-              //sign in manually
-              Navigator.of(context).pushNamed('main');
-            },
+            onPressed: () async {
+    final email = _emailController.text;
+    final password = _passController.text;
+    
+    final url = 'http://192.168.239.185:5001/predict'; // Flask server URL
+    
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        print('Login successful: ${result['prediction']}');
+        Navigator.of(context).pushNamed('main');
+      } else {
+        print('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  },
             disable: false,
           ),
         ],
