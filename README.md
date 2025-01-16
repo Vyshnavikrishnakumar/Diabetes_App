@@ -1,4 +1,4 @@
-# dol
+# Diabetes Prediction
 
 A new Flutter project.
 
