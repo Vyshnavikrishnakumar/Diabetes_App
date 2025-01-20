@@ -25,10 +25,13 @@ You need to have Flutter installed in your device in order to run the applicatio
 To use the Diabetes Prediction feature, you need to install Flask API on your device and the required packages:
 
 cd flask-app
+
 pip install -r requirements.txt
 
 To run the app and in a different terminal, run the following to put the Diabetes Prediction feature to work::
 
 flutter run
+
 cd flask-app
+
 python app.py
