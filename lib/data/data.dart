@@ -99,7 +99,7 @@ const dummyMeals = [
     title: 'Toast Hawaii',
     affordability: Affordability.affordable,
     complexity: Complexity.simple,
-    imageUrl: 'https://www.familienkost.de/images/toast_hawaii.jpg',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR61H7iPxbdrPu-lrAf7RzHtVnmRL7OAsiQQ&s',
     duration: 10,
     ingredients: [
       '1 Slice White Bread',
@@ -128,7 +128,7 @@ const dummyMeals = [
     affordability: Affordability.pricey,
     complexity: Complexity.simple,
     imageUrl:
-        'https://assets.biggreenegg.eu/app/uploads/2019/03/28145521/topimage-classic-hamburger-2019m04-800x534.jpg',
+        'https://tastesbetterfromscratch.com/wp-content/uploads/2020/06/Hamburger-Recipe24-Thumbnail-1.jpg',
     duration: 45,
     ingredients: [
       '300g Cattle Hack',
@@ -159,7 +159,7 @@ const dummyMeals = [
     affordability: Affordability.luxurious,
     complexity: Complexity.challenging,
     imageUrl:
-        'https://ellerepublic.de/wp-content/uploads/2015/01/Schnitzel-DE.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLLR6aBy-DbxQjpOJgbFJRYh1MiOZm68Xq3w&s',
     duration: 60,
     ingredients: [
       '8 Veal Cutlets',
@@ -297,7 +297,7 @@ const dummyMeals = [
     affordability: Affordability.pricey,
     complexity: Complexity.challenging,
     imageUrl:
-        'https://i0.wp.com/www.onceuponachef.com/images/2009/08/pancakes-01.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwrJUcB6YN13HDLTHg20x1wFFs70cqlR9DCQ&s',
     duration: 35,
     ingredients: [
       '4 Chicken Breasts',
@@ -330,7 +330,7 @@ const dummyMeals = [
     affordability: Affordability.affordable,
     complexity: Complexity.hard,
     imageUrl:
-        'https://res.cloudinary.com/hsxfx8igq/image/upload/ar_2:3,c_limit,f_auto,w_600,q_auto:best/v1617866040/WhatsApp_Image_2021-04-06_at_09.38.02_1_hjgult.jpg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRu2o3LqKtwfLFL21H-b33QWNko7rgVpgztOw&s',
     duration: 45,
     ingredients: [
       '1 Teaspoon melted Butter',
@@ -381,7 +381,7 @@ const dummyMeals = [
     affordability: Affordability.luxurious,
     complexity: Complexity.simple,
     imageUrl:
-        'https://img.taste.com.au/X2-zKxOD/w720-h480-cfill-q80/taste/2016/11/asparagus-avocado-and-cherry-tomato-salad-67600-1.jpeg',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLY3gwgsKG-Y2pDSvz_r81Thh32U0vBRSc-A&s',
     duration: 30,
     ingredients: [
       'White and Green Asparagus',
