@@ -93,7 +93,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
                       }).toList();
 
                       var url =
-                          'http://10.112.228.18:5001/predict'; // URL to your Flask server to be updated according to IP address
+                          'http://192.168.5.90:5001/predict'; // URL to your Flask server to be updated according to IP address
                       var response = await http.post(
                         Uri.parse(url),
                         headers: {"Content-Type": "application/json"},
