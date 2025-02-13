@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class FastCheckPage extends StatefulWidget {
-  const FastCheckPage({super.key});
+  const FastCheckPage({Key? key}) : super(key: key);
 
   @override
   _FastCheckPageState createState() => _FastCheckPageState();
@@ -12,8 +12,9 @@ class FastCheckPage extends StatefulWidget {
 
 class _FastCheckPageState extends State<FastCheckPage> {
   final _formKey = GlobalKey<FormState>();
-  String predictionResult = "";
+  String predictionResult = "Awaiting prediction...";
   Color predictionColor = Colors.black;
+
   final List<TextEditingController> controllers =
       List.generate(7, (index) => TextEditingController());
 
@@ -21,6 +22,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
   String shivering = '0';
   final Map<int, String?> errorMessages = {};
 
+  /// Validates an input field based on min/max range
   void _validateField(int index, double min, double max, String label) {
     String text = controllers[index].text;
     setState(() {
@@ -41,12 +43,14 @@ class _FastCheckPageState extends State<FastCheckPage> {
     });
   }
 
+  /// Sends data to the API and updates UI
   Future<void> _predict() async {
     if (errorMessages.values.any((error) => error != null)) {
       return;
     }
 
-    List<double> inputValues = controllers.map((c) => double.parse(c.text)).toList();
+    List<double> inputValues =
+        controllers.map((c) => double.tryParse(c.text) ?? 0).toList();
     inputValues.add(double.parse(sweating));
     inputValues.add(double.parse(shivering));
 
@@ -66,20 +70,21 @@ class _FastCheckPageState extends State<FastCheckPage> {
             predictionColor = Colors.green;
           } else if (result < 0.8) {
             predictionResult = 'Potentially Diabetic, consult a doctor.';
-            predictionColor = Colors.yellow;
+            predictionColor = Colors.orange;
           } else {
             predictionResult = 'Diabetic, seek medical attention.';
             predictionColor = Colors.red;
           }
         });
       } else {
-        _showAlert('Server error: ${response.statusCode}');
+        _showAlert('Server error: ${response.statusCode}, ${response.body}');
       }
     } catch (e) {
-      _showAlert('Network error: Unable to reach server.');
+      _showAlert('Network error: $e');
     }
   }
 
+  /// Displays an alert dialog
   void _showAlert(String message) {
     showDialog(
       context: context,
@@ -110,12 +115,11 @@ class _FastCheckPageState extends State<FastCheckPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _buildTableRow("Age", 0, 1, 110),
-                _buildTableRow("BGL", 1, 20, 500),
-                _buildTableRow("DBP", 2, 40, 200),
-                _buildTableRow("SBP", 3, 70, 200),
-                _buildTableRow("Temperature (°F)", 4, 94, 110),
-                _buildTableRow("SPO2", 5, 94, 100),
+                _buildTableRow("BGL", 0, 20, 500),
+                _buildTableRow("DBP", 1, 40, 200),
+                _buildTableRow("SBP", 2, 70, 200),
+                _buildTableRow("Temperature (°F)", 3, 94, 110),
+                _buildTableRow("SPO2", 4, 94, 100),
                 _buildDropdown("Sweating", (val) {
                   if (val != null) setState(() => sweating = val);
                 }),
@@ -125,22 +129,12 @@ class _FastCheckPageState extends State<FastCheckPage> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _predict,
-                  style: ElevatedButton.styleFrom(backgroundColor: Config.primaryColor),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Config.primaryColor),
                   child: const Text('Predict'),
                 ),
                 const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    predictionResult,
-                    style: TextStyle(fontSize: 20, color: predictionColor),
-                  ),
-                ),
+                _buildPredictionBox(),
               ],
             ),
           ),
@@ -149,6 +143,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
     );
   }
 
+  /// Builds an input field with validation
   Widget _buildTableRow(String label, int index, double min, double max) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -170,6 +165,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
     );
   }
 
+  /// Builds a dropdown for binary choices (Sweating, Shivering)
   Widget _buildDropdown(String label, ValueChanged<String?> onChanged) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -183,6 +179,24 @@ class _FastCheckPageState extends State<FastCheckPage> {
           return DropdownMenuItem(value: val, child: Text(val));
         }).toList(),
         onChanged: onChanged,
+      ),
+    );
+  }
+
+  /// Builds a styled container to display the prediction result
+  Widget _buildPredictionBox() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        predictionResult,
+        style: TextStyle(fontSize: 20, color: predictionColor, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
       ),
     );
   }
