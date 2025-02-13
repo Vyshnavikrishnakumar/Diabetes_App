@@ -7,13 +7,15 @@ import 'package:http/http.dart' as http;
 import 'dart:math';
 
 class LineChartWidget extends StatefulWidget {
+  const LineChartWidget({super.key});
+
   @override
   _LineChartWidgetState createState() => _LineChartWidgetState();
 }
 
 class _LineChartWidgetState extends State<LineChartWidget>
     with AutomaticKeepAliveClientMixin {
-  List<FlSpot> _spots = [];
+  final List<FlSpot> _spots = [];
   final int maxPoints = 10;
   DateTime now = DateTime.now();
 
@@ -40,7 +42,7 @@ class _LineChartWidgetState extends State<LineChartWidget>
   Future<int> _fetchNumber() async {
     try {
       var url =
-          "http://10.112.228.18:5000/random_number"; // URL to your Flask server to be updated according to IP address
+          "http://192.168.29.185:5001/conc_number"; // URL to your Flask server to be updated according to IP address
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
@@ -123,12 +125,12 @@ class _LineChartWidgetState extends State<LineChartWidget>
                 height: 40,
                 child: ElevatedButton(
                   onPressed: refreshTime,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
                   child: Text(
                     'Refresh',
                     style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
                   ),
                 ),
               ),
@@ -137,12 +139,12 @@ class _LineChartWidgetState extends State<LineChartWidget>
                 height: 40,
                 child: ElevatedButton(
                   onPressed: _showLatestReading,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                  ),
                   child: Text(
                     'Display',
                     style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
                   ),
                 ),
               ),

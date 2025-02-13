@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:phase_1_app/utils/config.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
-import 'package:phase_1_app/utils/config.dart';
 
 class FastCheckPage extends StatefulWidget {
-  const FastCheckPage({Key? key}) : super(key: key);
+  const FastCheckPage({super.key});
 
   @override
   _FastCheckPageState createState() => _FastCheckPageState();
@@ -14,31 +12,95 @@ class FastCheckPage extends StatefulWidget {
 
 class _FastCheckPageState extends State<FastCheckPage> {
   final _formKey = GlobalKey<FormState>();
-  var result = 0;
   String predictionResult = "";
   Color predictionColor = Colors.black;
-
-  final rowSpacer = TableRow(children: [
-    SizedBox(
-      height: 10,
-    ),
-    SizedBox(
-      height: 10,
-    ),
-    SizedBox(
-      height: 10,
-    )
-  ]);
-
   final List<TextEditingController> controllers =
-      List<TextEditingController>.generate(
-          9, (index) => TextEditingController());
+      List.generate(7, (index) => TextEditingController());
+
+  String sweating = '0';
+  String shivering = '0';
+  final Map<int, String?> errorMessages = {};
+
+  void _validateField(int index, double min, double max, String label) {
+    String text = controllers[index].text;
+    setState(() {
+      if (text.isEmpty) {
+        errorMessages[index] = "Field cannot be empty";
+      } else {
+        try {
+          double value = double.parse(text);
+          if (value < min || value > max) {
+            errorMessages[index] = "$label must be between $min and $max";
+          } else {
+            errorMessages[index] = null;
+          }
+        } catch (e) {
+          errorMessages[index] = "Enter a valid number";
+        }
+      }
+    });
+  }
+
+  Future<void> _predict() async {
+    if (errorMessages.values.any((error) => error != null)) {
+      return;
+    }
+
+    List<double> inputValues = controllers.map((c) => double.parse(c.text)).toList();
+    inputValues.add(double.parse(sweating));
+    inputValues.add(double.parse(shivering));
+
+    var url = 'http://192.168.29.185:5001/predict';
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({'input': inputValues}),
+      );
+
+      if (response.statusCode == 200) {
+        var result = jsonDecode(response.body)['prediction'];
+        setState(() {
+          if (result < 0.5) {
+            predictionResult = 'Non Diabetic';
+            predictionColor = Colors.green;
+          } else if (result < 0.8) {
+            predictionResult = 'Potentially Diabetic, consult a doctor.';
+            predictionColor = Colors.yellow;
+          } else {
+            predictionResult = 'Diabetic, seek medical attention.';
+            predictionColor = Colors.red;
+          }
+        });
+      } else {
+        _showAlert('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showAlert('Network error: Unable to reach server.');
+    }
+  }
+
+  void _showAlert(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Warning"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Fast Check'),
+        title: const Text('Fast Check'),
         backgroundColor: Config.primaryColor,
       ),
       body: Padding(
@@ -48,102 +110,35 @@ class _FastCheckPageState extends State<FastCheckPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Center(
-                  child: Table(
-                    defaultColumnWidth:
-                        FlexColumnWidth(), // Distribute space equally
-                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                    children: [
-                      TableRow(
-                        children: [
-                          _buildTableRow("Age", controller: controllers[0]),
-                          _buildTableRow("BGL", controller: controllers[1]),
-                          _buildTableRow("DBP", controller: controllers[2]),
-                        ],
-                      ),
-                      rowSpacer,
-                      TableRow(
-                        children: [
-                          _buildTableRow("SBP", controller: controllers[3]),
-                          _buildTableRow("Heart Rate",
-                              controller: controllers[4]),
-                          _buildTableRow("Temperature",
-                              controller: controllers[5]),
-                        ],
-                      ),
-                      rowSpacer,
-                      TableRow(
-                        children: [
-                          _buildTableRow("SPO2", controller: controllers[6]),
-                          _buildTableRow("Sweating",
-                              controller: controllers[7]),
-                          _buildTableRow("Shivering",
-                              controller: controllers[8]),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
+                _buildTableRow("Age", 0, 1, 110),
+                _buildTableRow("BGL", 1, 20, 500),
+                _buildTableRow("DBP", 2, 40, 200),
+                _buildTableRow("SBP", 3, 70, 200),
+                _buildTableRow("Temperature (°F)", 4, 94, 110),
+                _buildTableRow("SPO2", 5, 94, 100),
+                _buildDropdown("Sweating", (val) {
+                  if (val != null) setState(() => sweating = val);
+                }),
+                _buildDropdown("Shivering", (val) {
+                  if (val != null) setState(() => shivering = val);
+                }),
+                const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      List<double> inputValues = controllers.map((controller) {
-                        return double.parse(controller.text);
-                      }).toList();
-
-                      var url =
-                          'http://192.168.5.90:5001/predict'; // URL to your Flask server to be updated according to IP address
-                      var response = await http.post(
-                        Uri.parse(url),
-                        headers: {"Content-Type": "application/json"},
-                        body: json.encode({'input': inputValues}),
-                      );
-
-                      if (response.statusCode == 200) {
-                        var result = jsonDecode(response.body)['prediction'];
-
-                        if (result < 0.5) {
-                          predictionResult =
-                              'Your current results suggest the case is Non Diabetic';
-                          predictionColor = Colors.green;
-                        } else if (result < 0.8) {
-                          predictionResult =
-                              'Your current results suggest a potential case of being Diabetic, follow with your caretaker';
-                          predictionColor = Colors.yellow;
-                        } else {
-                          predictionResult =
-                              'Your current results suggest your case most probably as Diabetic, you need to receive a proper treatment';
-                          predictionColor = Colors.red;
-                        }
-
-                        setState(() {
-                          print('The result is, $result');
-                        });
-                      } else {
-                        // If server returns a non-200 response
-                        print(
-                            'Server error. HTTP status: ${response.statusCode}');
-                      }
-                    }
-                  },
-                  child: Text('Predict'),
+                  onPressed: _predict,
                   style: ElevatedButton.styleFrom(backgroundColor: Config.primaryColor),
+                  child: const Text('Predict'),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: RichText(
-                    text: TextSpan(
-                      text: predictionResult,
-                      style: TextStyle(fontSize: 20, color: predictionColor),
-                    ),
+                  child: Text(
+                    predictionResult,
+                    style: TextStyle(fontSize: 20, color: predictionColor),
                   ),
                 ),
               ],
@@ -154,22 +149,41 @@ class _FastCheckPageState extends State<FastCheckPage> {
     );
   }
 
-  Widget _buildTableRow(String label1,
-      {TextEditingController? controller, bool bold = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label1, style: TextStyle(fontWeight: FontWeight.bold)),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.2,
-          height: 50,
-          child: Center(
-            child: TextFormField(
-              controller: controller,
+  Widget _buildTableRow(String label, int index, double min, double max) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            controller: controllers[index],
+            decoration: InputDecoration(
+              labelText: label,
+              border: OutlineInputBorder(),
+              errorText: errorMessages[index],
             ),
+            keyboardType: TextInputType.number,
+            onChanged: (value) => _validateField(index, min, max, label),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdown(String label, ValueChanged<String?> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
         ),
-      ],
+        value: '0',
+        items: ['0', '1'].map((val) {
+          return DropdownMenuItem(value: val, child: Text(val));
+        }).toList(),
+        onChanged: onChanged,
+      ),
     );
   }
 }

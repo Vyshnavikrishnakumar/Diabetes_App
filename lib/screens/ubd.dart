@@ -11,13 +11,9 @@ class UBDPage extends StatefulWidget {
 }
 
 class _UBDPageState extends State<UBDPage> {
-  // Inputs to be received from the user
-
-  final TextEditingController tddController =
-      TextEditingController(text: 'TDD');
-  final TextEditingController wtController = TextEditingController(text: 'WT');
-  final TextEditingController tbgController =
-      TextEditingController(text: 'TBG');
+  final TextEditingController tddController = TextEditingController();
+  final TextEditingController wtController = TextEditingController();
+  final TextEditingController tbgController = TextEditingController();
 
   double latestUBD = 0.0;
   double LIT = 0;
@@ -25,126 +21,83 @@ class _UBDPageState extends State<UBDPage> {
 
   String? selectedActivity;
   String? selectedMeal;
+
+  bool isValidTDD = false;
+  bool isValidWeight = false;
+  bool isValidTBG = false;
+
   final Map<String, int> activityValues = {
-    'Sleeping': 6,
-    'Slow Walking': 8,
-    'Light Yoga': 10,
-    'Casual Cycling': 12,
-    'Jogging': 14,
-    'Running': 16,
-    'Training': 18,
-    'Weightlifting': 20
+    'Sleeping': 6, 'Slow Walking': 8, 'Light Yoga': 10,
+    'Casual Cycling': 12, 'Jogging': 14, 'Running': 16,
+    'Training': 18, 'Weightlifting': 20, 'Swimming': 22,
+    'Hiking': 24, 'Biking': 16, 'Dancing': 14, 'Boxing': 26,
+    'HIIT': 30, 'Pilates': 12, 'Zumba': 14, 'Rock Climbing': 28,
+    'Martial Arts': 22, 'Crossfit': 25, 'Rowing': 20, 'Skating': 18,
   };
+
   final Map<String, int> mealValues = {
-    'Rice': 53,
-    'Pasta': 40,
-    'Fruit Salad': 25,
+    'Rice with Dal': 55, 'Rice with Chicken Curry': 70,
+    'Rice with Paneer Butter Masala': 80, 'Rice with Vegetable Curry': 65,
+    'Pasta with Pesto': 50, 'Pasta with Marinara Sauce': 45,
+    'Fruit Salad with Yogurt': 30, 'Chapati with Dal': 50,
+    'Chapati with Chicken Curry': 60, 'Chapati with Paneer Curry': 65,
+    'Naan with Butter Chicken': 75, 'Biryani with Raita': 85,
+    'Biryani with Chicken': 90, 'Butter Chicken with Naan': 85,
   };
 
-  Future<int> _fetchLatestCBG() async {
-    try {
-      var url ="http://192.168.239.185:5001/predict"; // Change according to your Flask API
-      final response = await http.post(Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},  // Ensure you're sending JSON
-      body: json.encode({
-        'data': {
-             "input": [5.1, 3.5, 1.4, 0.2, 1, 0, 1, 8, 0]
-                }
-,  // Replace this with actual data you want to send
-      }),
-      );
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        if (data['concentration_reading'] != null &&
-            data['concentration_reading'] is int) {
-          return data['concentration_reading'];
-        } else {
-          return 0;
-        }
-      } else {
-        return 0; // Set to 0 in case of a non-200 response
-      }
-    } catch (e) {
-      print('Error: $e');
-      return 0; // Set to 0 in case of an exception
-    }
+  void _validateInputs() {
+    setState(() {
+      double? tdd = double.tryParse(tddController.text);
+      double? weight = double.tryParse(wtController.text);
+      double? tbg = double.tryParse(tbgController.text);
+
+      isValidTDD = tdd != null && tdd >= 40 && tdd <= 500;
+      isValidWeight = weight != null && weight >= 2.5 && weight <= 400;
+      isValidTBG = tbg != null && tbg >= 20 && tbg <= 50;
+    });
   }
 
-  // Show the popup for LIT value input if user to enter his LIT for the first time
-  Future<void> _showLITPopup() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Enter LIT Value For the First Time'),
-          content: TextField(
-            onChanged: (value) {
-              //
-              LIT = double.tryParse(value) ?? 0.0;
-            },
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(hintText: "Enter LIT value"),
+  Widget _buildInputField(TextEditingController controller, String label, double min, double max) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Enter $label',
+            border: const OutlineInputBorder(),
+            errorText: (controller.text.isNotEmpty &&
+                    (double.tryParse(controller.text) == null ||
+                        double.parse(controller.text) < min ||
+                        double.parse(controller.text) > max))
+                ? 'Value must be between $min and $max'
+                : null,
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Confirm'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _calculateAndShowUBD();
-              },
-            ),
-          ],
-        );
-      },
+          onChanged: (value) => _validateInputs(),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
-  // Show the popup for UBD value input if user to enter his UBD for the first time
-
-  Future<void> _showLatestUBDPopup() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Enter latest UBD Value'),
-          content: TextField(
-            onChanged: (value) {
-              latestUBD = double.tryParse(value) ?? 0.0;
-            },
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(hintText: "Enter latest UBD value"),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Confirm'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _calculateAndShowUBD();
-              },
-            ),
-          ],
-        );
+  Widget _buildDropdownField(Map<String, int> values, String? selectedValue, String label, ValueChanged<String?> onChanged) {
+    return DropdownButtonFormField<String>(
+      value: selectedValue,
+      decoration: InputDecoration(labelText: label),
+      items: values.keys.map((String key) => DropdownMenuItem(value: key, child: Text(key))).toList(),
+      onChanged: (val) {
+        setState(() {
+          onChanged(val);
+        });
       },
     );
-  }
-
-  void _sendUBDToESP32(int ubd) async {
-    try {
-      var url = Uri.parse('http://10.112.224.57/data'); // ESP32 WiFi IP Address
-      var response = await http.post(url, body: 'UBD Value: $ubd');
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-    } catch (e) {
-      print('Error sending UBD to ESP32: $e');
-    }
   }
 
   void _calculateAndShowUBD() async {
     final int CBG = 120;
-
-    // If it is the first time user open the application then show the pop-ups to enter LIT & UBD
 
     if (LIT == 0) {
       await _showLITPopup();
@@ -155,49 +108,21 @@ class _UBDPageState extends State<UBDPage> {
       return;
     }
 
-    // Internal calculations according to paper equation
-
     final double tdd = double.tryParse(tddController.text) ?? 0;
     final double wt = double.tryParse(wtController.text) ?? 0;
     final double valueOfMeal = mealValues[selectedMeal]!.toDouble();
     final double AM = (activityValues[selectedActivity] ?? 0) / 10;
-
     final double icAverage = ((500 / tdd) + (850 / wt)) / 2;
-
     final double fd = valueOfMeal / icAverage;
-
     final double SF = 1700 / tdd;
-
     final double TBG = double.tryParse(tbgController.text) ?? 0;
-
     final double CD = (CBG - TBG) / SF;
-
-    print('IC Average $icAverage');
-
-    print('FD value: $fd');
-
-    print('CD value: $CD');
-
-    // Update LIT (Last Insulin Time) based on the last UBD update
-    if (lastUBDUpdate != null) {
-      final Duration timeDifference = DateTime.now().difference(lastUBDUpdate!);
-      LIT = timeDifference.inHours.toDouble();
-    }
-
     final double iob = latestUBD * (1 - LIT / 5) * 0.2;
-
     final double ubd = (fd + CD - iob) * AM;
 
-    print('LIT Value $LIT');
-    print('latestUBD  $latestUBD');
-    print('Glucose Reading $CBG');
-    print('IOB $iob');
-
-    // Update the latest UBD reading
     latestUBD = ubd;
     lastUBDUpdate = DateTime.now();
 
-    // Show the UBD
     _showUBDConfirmationDialog(ubd.round());
   }
 
@@ -206,29 +131,16 @@ class _UBDPageState extends State<UBDPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('UBD Confirmation'),
-          content: Text(
-              'Your UBD is $ubd Units of Insulin dosage, do you want to confirm this insulin dosage to be injected?'),
+          title: const Text('UBD Confirmation'),
+          content: Text('Your UBD is $ubd Units. Confirm dosage?'),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
-                _sendUBDToESP32(
-                    ubd); // Send UBD TO ESP-32 as the injection dosage
-                Navigator.of(context).pop();
-              },
-              child: const Text('Confirm'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Reconsider'),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Reconsider'),
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Confirm', style: TextStyle(color: Colors.green)),
             ),
           ],
         );
@@ -236,10 +148,64 @@ class _UBDPageState extends State<UBDPage> {
     );
   }
 
+  Future<void> _showLITPopup() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Enter LIT Value'),
+          content: TextField(
+            onChanged: (value) {
+              LIT = double.tryParse(value) ?? 0.0;
+            },
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(hintText: "Enter LIT value"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Confirm'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _calculateAndShowUBD();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  Future<void> _showLatestUBDPopup() async {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Enter Latest UBD Value'),
+        content: TextField(
+          onChanged: (value) {
+            latestUBD = double.tryParse(value) ?? 0.0;
+          },
+          keyboardType: TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(hintText: "Enter latest UBD value"),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Confirm'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _calculateAndShowUBD();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = Theme.of(context).scaffoldBackgroundColor;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('UBD Calculation'),
@@ -249,78 +215,29 @@ class _UBDPageState extends State<UBDPage> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 2,
-              childAspectRatio: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              children: [
-                _buildInputField(tddController),
-                _buildInputField(wtController),
-                _buildDropdownField(
-                    activityValues, selectedActivity, 'Select Activity',
-                    (newValue) {
-                  setState(() {
-                    selectedActivity = newValue;
-                  });
-                }),
-                _buildDropdownField(mealValues, selectedMeal, 'Select Meal',
-                    (newValue) {
-                  setState(() {
-                    selectedMeal = newValue;
-                  });
-                }),
-                _buildInputField(tbgController),
-              ],
-            ),
+            _buildInputField(tddController, 'TDD', 40, 500),
+            _buildInputField(wtController, 'Weight (kg)', 2.5, 400),
+            const SizedBox(height: 7),
+            const Text('Activity',style: TextStyle(fontWeight: FontWeight.bold),
+            ), 
+            _buildDropdownField(activityValues, selectedActivity, 'Activity', (val) {
+              selectedActivity = val;
+            }),
+            const SizedBox(height: 15),
+            const Text('Meal',style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            _buildDropdownField(mealValues, selectedMeal, 'Meal', (val) {
+              selectedMeal = val;
+            }),
+            _buildInputField(tbgController, 'TBG', 20, 50),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _calculateAndShowUBD,
               child: const Text('Proceed'),
-              style: ElevatedButton.styleFrom(
-               backgroundColor: Config.primaryColor, // Or Colors.white if that’s the intended color
-              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildInputField(TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        hintText: 'Enter value',
-      ),
-    );
-  }
-
-  Widget _buildDropdownField(Map<String, int> values, String? selectedValue,
-      String labelText, ValueChanged<String?> onChanged) {
-    return DropdownButtonFormField<String>(
-      value: selectedValue,
-      decoration: InputDecoration(
-        border: const OutlineInputBorder(),
-        labelText: labelText,
-      ),
-      items: values.keys.map((String key) {
-        return DropdownMenuItem<String>(
-          value: key,
-          child: Text(key),
-        );
-      }).toList(),
-      onChanged: onChanged,
-    );
-  }
-
-  @override
-  void dispose() {
-    tddController.dispose();
-    wtController.dispose();
-    tbgController.dispose();
-    super.dispose();
   }
 }

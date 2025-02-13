@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:phase_1_app/utils/config.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({Key? key}) : super(key: key);
+  const LoginForm({super.key});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -96,7 +96,7 @@ class _LoginFormState extends State<LoginForm> {
                 final email = _emailController.text.trim();
                 final password = _passController.text.trim();
 
-                const url = 'http://192.168.5.90:5001/login'; // Flask endpoint
+                const url = 'http://192.168.29.185:5001/login'; // Flask endpoint
 
                 try {
                   final response = await http.post(

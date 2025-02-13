@@ -133,7 +133,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
             child: ListView.builder(
               itemCount: filteredSchedules.length,
               itemBuilder: (context, index) {
-                var _schedule = filteredSchedules[index];
+                var schedule = filteredSchedules[index];
                 bool isLastElement = filteredSchedules.length - 1 == index;
                 return Card(
                   shape: RoundedRectangleBorder(
@@ -154,7 +154,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           children: [
                             CircleAvatar(
                               backgroundImage:
-                                  AssetImage(_schedule['doctor_profile']),
+                                  AssetImage(schedule['doctor_profile']),
                             ),
                             const SizedBox(
                               width: 10,
@@ -163,7 +163,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _schedule['doctor_name'],
+                                  schedule['doctor_name'],
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w700,
@@ -173,7 +173,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                   height: 5,
                                 ),
                                 Text(
-                                  _schedule['category'],
+                                  schedule['category'],
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
@@ -186,7 +186,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         const SizedBox(
                           height: 15,
                         ),
-                        if (_schedule['status'] != FilterStatus.completed)
+                        if (schedule['status'] != FilterStatus.completed)
                           ScheduleCard(),
                         const SizedBox(
                           height: 15,
@@ -198,7 +198,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                               child: OutlinedButton(
                                 onPressed: () {
                                   setState(() {
-                                    schedules.remove(_schedule);
+                                    schedules.remove(schedule);
                                   });
                                 },
                                 child: const Text(
@@ -210,7 +210,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             const SizedBox(
                               width: 20,
                             ),
-                            if (_schedule['status'] != FilterStatus.completed)
+                            if (schedule['status'] != FilterStatus.completed)
                               OutlinedButton(
                                 style: OutlinedButton.styleFrom(
                                     backgroundColor: Config.primaryColor),
@@ -224,7 +224,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                   );
                                   if (picked != null) {
                                     setState(() {
-                                      _schedule['date'] = picked;
+                                      schedule['date'] = picked;
                                     });
                                     showDialog(
                                       context: context,
@@ -261,9 +261,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => DoctorDetails(
-                                        doctorName: _schedule['doctor_name'],
+                                        doctorName: schedule['doctor_name'],
                                         doctorImage:
-                                            _schedule['doctor_profile'],
+                                            schedule['doctor_profile'],
                                       ),
                                     ),
                                   );
@@ -290,7 +290,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
 }
 
 class ScheduleCard extends StatefulWidget {
-  ScheduleCard({Key? key}) : super(key: key);
+  const ScheduleCard({super.key});
 
   @override
   _ScheduleCardState createState() => _ScheduleCardState();

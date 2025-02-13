@@ -56,7 +56,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            'Are You Ok?',
+                            'Please visit as per your appointment',
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
@@ -77,10 +77,6 @@ class _AppointmentCardState extends State<AppointmentCard> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               isCanceled ? Colors.grey : Colors.red,
-                        ),
-                        child: Text(
-                          isCanceled ? 'Canceled' : 'Cancel',
-                          style: TextStyle(color: Colors.white),
                         ),
                         onPressed: isCanceled
                             ? null
@@ -111,6 +107,10 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                   },
                                 );
                               },
+                        child: Text(
+                          isCanceled ? 'Canceled' : 'Cancel',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                     const SizedBox(
@@ -121,10 +121,6 @@ class _AppointmentCardState extends State<AppointmentCard> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               isCompleted ? Colors.green : Colors.blue,
-                        ),
-                        child: Text(
-                          isCompleted ? 'Completed' : 'Already Done?',
-                          style: TextStyle(color: Colors.white),
                         ),
                         onPressed: isCompleted
                             ? null
@@ -150,6 +146,10 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                   },
                                 );
                               },
+                        child: Text(
+                          isCompleted ? 'Completed' : 'Already Done?',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     )
                   ],
@@ -185,7 +185,7 @@ class ScheduleCard extends StatelessWidget {
             width: 5,
           ),
           Text(
-            'Thursday, 22/6/2023',
+            'Thursday, 22/6/2025',
             style: const TextStyle(color: Colors.white),
           ),
           const SizedBox(

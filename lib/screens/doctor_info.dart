@@ -15,10 +15,11 @@ class DoctorDetails extends StatefulWidget {
 
 class _DoctorDetailsState extends State<DoctorDetails> {
   bool isFav = false;
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: CustomAppBar(
-          appTitle: widget.doctorName + '\'s Profile',
+          appTitle: '${widget.doctorName}\'s Profile',
           icon: const FaIcon(Icons.arrow_back_ios),
           actions: [
             IconButton(
@@ -53,7 +54,7 @@ class AboutDoctor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Config().init(context);
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: Column(
         children: [
