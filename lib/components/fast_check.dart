@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:twilio_flutter/twilio_flutter.dart';
 import 'dart:convert';
 import 'package:phase_1_app/utils/config.dart';
+import 'secret.dart';
 
 class FastCheckPage extends StatefulWidget {
   const FastCheckPage({Key? key}) : super(key: key);
@@ -35,9 +36,9 @@ class _FastCheckPageState extends State<FastCheckPage> {
     _loadEmergencyContact();
 
     twilioFlutter = TwilioFlutter(
-      accountSid: 'AC6432b23ad4f070143026379f070132db',
-      authToken: 'ce7a0b33135958adecbc09bca7b75946',
-      twilioNumber: '+15074106535',
+      accountSid:Secrets.accountSid,
+      authToken: Secrets.authToken,
+      twilioNumber:Secrets.twilioNumber,
     );
   }
 
