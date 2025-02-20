@@ -208,7 +208,7 @@ class _UBDPageState extends State<UBDPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('UBD Calculation'),
+        title: const Text('Insulin UBD Calculation'),
         backgroundColor: Config.primaryColor,
       ),
       body: Padding(
