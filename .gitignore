@@ -45,5 +45,5 @@ app.*.map.json
 /android/app/release
 
 
-# 🔒 Hiding API Keys
-lib/secret.dart
+# 🔒 Hiding API Key
+lib/components/secret.dart
