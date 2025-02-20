@@ -46,4 +46,5 @@ app.*.map.json
 
 
 # 🔒 Hiding API Key
+lib/components/fast_check.dart
 lib/components/secret.dart
