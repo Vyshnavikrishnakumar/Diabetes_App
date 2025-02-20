@@ -19,6 +19,8 @@ class _FastCheckPageState extends State<FastCheckPage> {
   Color predictionColor = Colors.black;
   late TwilioFlutter twilioFlutter;
 
+  double? predictionScore;
+
   final List<TextEditingController> controllers =
       List.generate(7, (index) => TextEditingController());
 
@@ -36,9 +38,9 @@ class _FastCheckPageState extends State<FastCheckPage> {
     _loadEmergencyContact();
 
     twilioFlutter = TwilioFlutter(
-      accountSid:Secrets.accountSid,
+      accountSid: Secrets.accountSid,
       authToken: Secrets.authToken,
-      twilioNumber:Secrets.twilioNumber,
+      twilioNumber: Secrets.twilioNumber,
     );
   }
 
@@ -59,15 +61,28 @@ class _FastCheckPageState extends State<FastCheckPage> {
     _showAlert("Emergency contact saved!");
   }
 
-  void _sendEmergencyMessage() {
+  void _sendEmergencyMessage(double prediction) {
     String contact = savedEmergencyContact ?? emergencyContactController.text;
     if (contact.isNotEmpty) {
+      String message;
+
+      if (prediction < 0.5) {
+        message =
+            "✅ Health Update: No signs of diabetes detected. Stay healthy!";
+      } else if (prediction < 0.8) {
+        message =
+            "⚠️ Warning: Possible signs of diabetes. Please consult a doctor soon.";
+      } else {
+        message =
+            "🚨 Emergency Alert! High risk of diabetes detected. Immediate medical attention is required!";
+      }
+
       twilioFlutter.sendSMS(
         toNumber: contact,
-        messageBody:
-            "Emergency Alert! Immediate medical attention is required.",
+        messageBody: message,
       );
-      _showAlert("Emergency alert sent!");
+
+      _showAlert("Message sent: $message");
     } else {
       _showAlert("No emergency contact set!");
     }
@@ -123,6 +138,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
         var result = jsonDecode(response.body)['prediction'];
 
         setState(() {
+          predictionScore = result;
           if (result < 0.5) {
             predictionResult = 'Non Diabetic';
             predictionColor = Colors.green;
@@ -134,6 +150,10 @@ class _FastCheckPageState extends State<FastCheckPage> {
             predictionColor = Colors.red;
           }
         });
+        // Automatically send an emergency SMS if the score is high
+if (predictionScore != null && predictionScore! >= 0.8) {
+  _sendEmergencyMessage(predictionScore!);
+}
       } else {
         _showAlert('Server error: ${response.statusCode}, ${response.body}');
       }
@@ -197,9 +217,18 @@ class _FastCheckPageState extends State<FastCheckPage> {
                 ElevatedButton(
                   onPressed: _saveEmergencyContact,
                   child: const Text("Save Emergency Contact"),
-                ),const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _sendEmergencyMessage,
+                  onPressed: () {
+                    if (predictionScore != null) {
+                      _sendEmergencyMessage(
+                          predictionScore!); // Pass the stored score ✅
+                    } else {
+                      _showAlert(
+                          "Please predict first before sending an alert.");
+                    }
+                  },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: const Text(
                     'Send Emergency Alert',
@@ -240,6 +269,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
       ),
     );
   }
+
   Widget _buildTableRow(String label, int index, double min, double max) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -255,6 +285,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
       ),
     );
   }
+
   Widget _buildPredictionBox() {
     return Container(
       width: double.infinity,
