@@ -42,7 +42,7 @@ class _LineChartWidgetState extends State<LineChartWidget>
   Future<int> _fetchNumber() async {
     try {
       var url =
-          "http://192.168.29.185:5001/conc_number"; // URL to your Flask server to be updated according to IP address
+          "http://192.168.184.186:5001/conc_number"; // URL to your Flask server to be updated according to IP address
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {

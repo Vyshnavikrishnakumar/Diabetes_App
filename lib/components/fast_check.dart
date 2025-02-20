@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:phase_1_app/utils/config.dart';
-import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:twilio_flutter/twilio_flutter.dart';
+import 'dart:convert';
+import 'package:phase_1_app/utils/config.dart';
 
 class FastCheckPage extends StatefulWidget {
   const FastCheckPage({Key? key}) : super(key: key);
@@ -14,15 +16,62 @@ class _FastCheckPageState extends State<FastCheckPage> {
   final _formKey = GlobalKey<FormState>();
   String predictionResult = "Awaiting prediction...";
   Color predictionColor = Colors.black;
+  late TwilioFlutter twilioFlutter;
 
   final List<TextEditingController> controllers =
       List.generate(7, (index) => TextEditingController());
 
+  final TextEditingController emergencyContactController =
+      TextEditingController();
+  String? savedEmergencyContact;
+
+  final Map<int, String?> errorMessages = {};
   String sweating = '0';
   String shivering = '0';
-  final Map<int, String?> errorMessages = {};
 
-  /// Validates an input field based on min/max range
+  @override
+  void initState() {
+    super.initState();
+    _loadEmergencyContact();
+
+    twilioFlutter = TwilioFlutter(
+      accountSid: 'AC6432b23ad4f070143026379f070132db',
+      authToken: 'ce7a0b33135958adecbc09bca7b75946',
+      twilioNumber: '+15074106535',
+    );
+  }
+
+  Future<void> _loadEmergencyContact() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      savedEmergencyContact = prefs.getString("emergencyContact") ?? "";
+      emergencyContactController.text = savedEmergencyContact ?? "";
+    });
+  }
+
+  Future<void> _saveEmergencyContact() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString("emergencyContact", emergencyContactController.text);
+    setState(() {
+      savedEmergencyContact = emergencyContactController.text;
+    });
+    _showAlert("Emergency contact saved!");
+  }
+
+  void _sendEmergencyMessage() {
+    String contact = savedEmergencyContact ?? emergencyContactController.text;
+    if (contact.isNotEmpty) {
+      twilioFlutter.sendSMS(
+        toNumber: contact,
+        messageBody:
+            "Emergency Alert! Immediate medical attention is required.",
+      );
+      _showAlert("Emergency alert sent!");
+    } else {
+      _showAlert("No emergency contact set!");
+    }
+  }
+
   void _validateField(int index, double min, double max, String label) {
     String text = controllers[index].text;
     setState(() {
@@ -43,19 +92,26 @@ class _FastCheckPageState extends State<FastCheckPage> {
     });
   }
 
-  /// Sends data to the API and updates UI
   Future<void> _predict() async {
+    for (int i = 0; i < controllers.length; i++) {
+      _validateField(i, 0, 200, "Field");
+    }
+
     if (errorMessages.values.any((error) => error != null)) {
+      _showAlert("Please fix the errors before submitting.");
       return;
     }
 
-    List<double> inputValues =
-        controllers.map((c) => double.tryParse(c.text) ?? 0).toList();
-    inputValues.add(double.parse(sweating));
-    inputValues.add(double.parse(shivering));
-
-    var url = 'http://192.168.29.185:5001/predict';
     try {
+      List<double> inputValues = controllers.map((c) {
+        return c.text.isEmpty ? 0.0 : double.parse(c.text);
+      }).toList();
+
+      inputValues.add(double.parse(sweating));
+      inputValues.add(double.parse(shivering));
+
+      var url = 'http://192.168.184.186:5001/predict';
+
       var response = await http.post(
         Uri.parse(url),
         headers: {"Content-Type": "application/json"},
@@ -64,6 +120,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
 
       if (response.statusCode == 200) {
         var result = jsonDecode(response.body)['prediction'];
+
         setState(() {
           if (result < 0.5) {
             predictionResult = 'Non Diabetic';
@@ -80,16 +137,15 @@ class _FastCheckPageState extends State<FastCheckPage> {
         _showAlert('Server error: ${response.statusCode}, ${response.body}');
       }
     } catch (e) {
-      _showAlert('Network error: $e');
+      _showAlert('Error: ${e.toString()}');
     }
   }
 
-  /// Displays an alert dialog
   void _showAlert(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Warning"),
+        title: const Text("EMERGENCY "),
         content: Text(message),
         actions: [
           TextButton(
@@ -115,17 +171,40 @@ class _FastCheckPageState extends State<FastCheckPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _buildTableRow("BGL", 0, 20, 500),
-                _buildTableRow("DBP", 1, 40, 200),
-                _buildTableRow("SBP", 2, 70, 200),
-                _buildTableRow("Temperature (°F)", 3, 94, 110),
-                _buildTableRow("SPO2", 4, 94, 100),
-                _buildDropdown("Sweating", (val) {
-                  if (val != null) setState(() => sweating = val);
+                _buildTableRow("Age", 0, 1, 120),
+                _buildTableRow("BGL", 1, 20, 500),
+                _buildTableRow("DBP", 2, 40, 200),
+                _buildTableRow("SBP", 3, 70, 200),
+                _buildTableRow("Heart Rate", 4, 60, 100),
+                _buildTableRow("Temperature (°F)", 5, 94, 110),
+                _buildTableRow("SPO2", 6, 94, 100),
+                _buildDropdown("Sweating", sweating, (val) {
+                  setState(() => sweating = val!);
                 }),
-                _buildDropdown("Shivering", (val) {
-                  if (val != null) setState(() => shivering = val);
+                _buildDropdown("Shivering", shivering, (val) {
+                  setState(() => shivering = val!);
                 }),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: emergencyContactController,
+                  decoration: const InputDecoration(
+                    labelText: "Emergency Contact",
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _saveEmergencyContact,
+                  child: const Text("Save Emergency Contact"),
+                ),const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _sendEmergencyMessage,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text(
+                    'Send Emergency Alert',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _predict,
@@ -143,30 +222,8 @@ class _FastCheckPageState extends State<FastCheckPage> {
     );
   }
 
-  /// Builds an input field with validation
-  Widget _buildTableRow(String label, int index, double min, double max) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            controller: controllers[index],
-            decoration: InputDecoration(
-              labelText: label,
-              border: OutlineInputBorder(),
-              errorText: errorMessages[index],
-            ),
-            keyboardType: TextInputType.number,
-            onChanged: (value) => _validateField(index, min, max, label),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Builds a dropdown for binary choices (Sweating, Shivering)
-  Widget _buildDropdown(String label, ValueChanged<String?> onChanged) {
+  Widget _buildDropdown(
+      String label, String selectedValue, ValueChanged<String?> onChanged) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<String>(
@@ -174,28 +231,41 @@ class _FastCheckPageState extends State<FastCheckPage> {
           labelText: label,
           border: OutlineInputBorder(),
         ),
-        value: '0',
-        items: ['0', '1'].map((val) {
-          return DropdownMenuItem(value: val, child: Text(val));
-        }).toList(),
+        value: selectedValue,
+        items: ['0', '1']
+            .map((val) => DropdownMenuItem(value: val, child: Text(val)))
+            .toList(),
         onChanged: onChanged,
       ),
     );
   }
-
-  /// Builds a styled container to display the prediction result
+  Widget _buildTableRow(String label, int index, double min, double max) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controllers[index],
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+          errorText: errorMessages[index],
+        ),
+        keyboardType: TextInputType.number,
+        onChanged: (value) => _validateField(index, min, max, label),
+      ),
+    );
+  }
   Widget _buildPredictionBox() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         predictionResult,
-        style: TextStyle(fontSize: 20, color: predictionColor, fontWeight: FontWeight.bold),
+        style: TextStyle(
+            fontSize: 20, color: predictionColor, fontWeight: FontWeight.bold),
         textAlign: TextAlign.center,
       ),
     );

@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
+  telephony: ^0.2.0
   csv: any
   fl_chart: ^0.70.1
   intl: ^0.20.1
@@ -43,6 +45,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   http: 1.2.2
+  flutter_sms: ^2.3.3
+  permission_handler: ^11.3.1
+  twilio_flutter: ^0.9.0
 
 dev_dependencies:
   flutter_test:

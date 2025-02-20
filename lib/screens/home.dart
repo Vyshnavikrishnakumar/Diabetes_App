@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
     },
     {
       "icon": FontAwesomeIcons.brain,
-      "category": 'Psychiarity',
+      "category": 'Psychiatry',
     }
   ];
   @override
