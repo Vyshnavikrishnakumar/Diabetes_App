@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:phase_1_app/utils/config.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class UBDPage extends StatefulWidget {
   const UBDPage({super.key});

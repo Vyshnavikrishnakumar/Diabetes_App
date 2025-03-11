@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:phase_1_app/utils/config.dart';
 
 class AppointmentCard extends StatefulWidget {
   const AppointmentCard({super.key});
@@ -14,148 +13,149 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Config.primaryColor,
-          borderRadius: BorderRadius.circular(10),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Doctor Info Section
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundImage: AssetImage('assets/doctor_image.jpg'),
+                  ),
+                  SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dr. Ahmed Mohsen',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'Scheduled Appointment',
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+
+              SizedBox(height: 15),
+              Divider(),
+
+              // Schedule Info Section
+              const ScheduleCard(),
+
+              SizedBox(height: 15),
+
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: isCanceled ? Colors.grey : Colors.red,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: isCanceled
+                          ? null
+                          : () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Cancel Appointment?'),
+                                    actions: [
+                                      TextButton(
+                                        child: Text('No'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: Text('Yes'),
+                                        onPressed: () {
+                                          setState(() {
+                                            isCanceled = true;
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                      child: Text(isCanceled ? 'Canceled' : 'Cancel'),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor:
+                            isCompleted ? Colors.green : Colors.blue,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: isCompleted
+                          ? null
+                          : () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Follow-up Completed?'),
+                                    actions: [
+                                      TextButton(
+                                        child: Text('Ok'),
+                                        onPressed: () {
+                                          setState(() {
+                                            isCompleted = true;
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                      child: Text(isCompleted ? 'Completed' : 'Mark Done'),
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
-        child: Material(
-            color: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(children: [
-                //row
-                Row(
-                  children: [
-                    Center(
-                      child: const CircleAvatar(
-                        radius: 30,
-                        backgroundImage: AssetImage('assets/doctor_image.jpg'),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Dr. Ahmed Mohsen',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.lightBlue,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            'Please visit as per your appointment',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                Config.spaceSmall,
-                //schedule info here
-                const ScheduleCard(),
-                Config.spaceSmall,
-                //action button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isCanceled ? Colors.grey : Colors.red,
-                        ),
-                        onPressed: isCanceled
-                            ? null
-                            : () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('Are you sure?'),
-                                      actions: [
-                                        TextButton(
-                                          child: Text('Exit'),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                        TextButton(
-                                          child: Text('Yes'),
-                                          onPressed: () {
-                                            setState(() {
-                                              isCanceled = true;
-                                            });
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                        child: Text(
-                          isCanceled ? 'Canceled' : 'Cancel',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isCompleted ? Colors.green : Colors.blue,
-                        ),
-                        onPressed: isCompleted
-                            ? null
-                            : () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text(
-                                          'Follow Up Completed Successfully'),
-                                      actions: [
-                                        TextButton(
-                                          child: Text('Ok'),
-                                          onPressed: () {
-                                            setState(() {
-                                              isCompleted = true;
-                                            });
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                        child: Text(
-                          isCompleted ? 'Completed' : 'Already Done?',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    )
-                  ],
-                )
-              ]),
-            )),
       ),
     );
   }
@@ -167,43 +167,34 @@ class ScheduleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.circular(10),
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(12),
       ),
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(
-            Icons.calendar_today,
-            color: Colors.white,
-            size: 15,
+          Row(
+            children: [
+              Icon(Icons.calendar_today, color: Colors.blue, size: 18),
+              SizedBox(width: 6),
+              Text(
+                'Thursday, 22 June 2025',
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ],
           ),
-          const SizedBox(
-            width: 5,
+          Row(
+            children: [
+              Icon(Icons.access_time, color: Colors.blue, size: 18),
+              SizedBox(width: 6),
+              Text(
+                '2:00 PM',
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ],
           ),
-          Text(
-            'Thursday, 22/6/2025',
-            style: const TextStyle(color: Colors.white),
-          ),
-          const SizedBox(
-            width: 20,
-          ),
-          const Icon(
-            Icons.access_alarm,
-            color: Colors.white,
-            size: 17,
-          ),
-          const SizedBox(
-            width: 5,
-          ),
-          Flexible(
-              child: Text(
-            '2:00 PM',
-            style: TextStyle(color: Colors.white),
-          ))
         ],
       ),
     );

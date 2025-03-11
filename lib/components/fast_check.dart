@@ -7,7 +7,7 @@ import 'package:phase_1_app/utils/config.dart';
 import 'secret.dart';
 
 class FastCheckPage extends StatefulWidget {
-  const FastCheckPage({Key? key}) : super(key: key);
+  const FastCheckPage({super.key});
 
   @override
   _FastCheckPageState createState() => _FastCheckPageState();
@@ -68,10 +68,10 @@ class _FastCheckPageState extends State<FastCheckPage> {
 
       if (prediction < 0.5) {
         message =
-            "✅ Health Update: No signs of diabetes detected. Stay healthy!";
+            "✅ Health Update: No signs of diabetes detected. Healthy!";
       } else if (prediction < 0.8) {
         message =
-            "⚠️ Warning: Possible signs of diabetes. Please consult a doctor soon.";
+            "⚠️ Warning: Possible signs of diabetes. Consultation a doctor soon.";
       } else {
         message =
             "🚨 Emergency Alert! High risk of diabetes detected. Immediate medical attention is required!";
@@ -126,7 +126,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
       inputValues.add(double.parse(sweating));
       inputValues.add(double.parse(shivering));
 
-      var url = 'http://192.168.184.186:5001/predict';
+      var url = 'http://192.168.182.185:5001/predict';
 
       var response = await http.post(
         Uri.parse(url),
@@ -166,7 +166,7 @@ if (predictionScore != null && predictionScore! >= 0.8) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("EMERGENCY "),
+        title: const Text("Emergency contact"),
         content: Text(message),
         actions: [
           TextButton(

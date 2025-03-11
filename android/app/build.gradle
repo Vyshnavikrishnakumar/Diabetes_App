@@ -1,3 +1,10 @@
+buildscript {
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.3.1"
+    }
+}
+
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -6,9 +13,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.dol"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    namespace "com.example.dol" // Replace with your app's package name
+    compileSdkVersion 35
+    //compileSdk = flutter.compileSdkVersion
+    ndkVersion "28.0.13004108"
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -16,7 +25,8 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "11"
+        //JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
@@ -24,20 +34,32 @@ android {
         applicationId = "com.example.dol"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdkVersion 21  // Ensure it's at least 21 or per your project needs
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+        //minSdk = flutter.minSdkVersion
+        //targetSdk = flutter.targetSdkVersion
+        //versionCode = flutter.versionCode
+        //versionName = flutter.versionName
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            //signingConfig = signingConfigs.debug
+            minifyEnabled true  // 🔹 Shrink & optimize APK
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            signingConfig signingConfigs.debug 
         }
     }
 }
+
+
+
+
 
 flutter {
     source = "../.."

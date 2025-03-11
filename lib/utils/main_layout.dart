@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:phase_1_app/components/fast_check.dart';
-import 'package:phase_1_app/data/data.dart';
-import 'package:phase_1_app/screens/groups.dart';
-import 'package:phase_1_app/screens/meals.dart';
 import 'package:phase_1_app/screens/tabs.dart';
 import 'package:phase_1_app/screens/ubd.dart';
-import 'package:phase_1_app/utils/text.dart';
 import '../screens/meeting_page.dart';
 import '../screens/home.dart';
-import '../utils/config.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MainLayout extends StatefulWidget {
