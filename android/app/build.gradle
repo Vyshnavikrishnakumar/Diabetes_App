@@ -4,7 +4,6 @@ buildscript {
     }
 }
 
-
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -14,19 +13,16 @@ plugins {
 
 android {
     namespace "com.example.dol" // Replace with your app's package name
-    compileSdkVersion 35
-    //compileSdk = flutter.compileSdkVersion
+    compileSdkVersion 34
     ndkVersion "28.0.13004108"
 
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
         jvmTarget = "11"
-        //JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
@@ -38,28 +34,18 @@ android {
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
-        //minSdk = flutter.minSdkVersion
-        //targetSdk = flutter.targetSdkVersion
-        //versionCode = flutter.versionCode
-        //versionName = flutter.versionName
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            //signingConfig = signingConfigs.debug
             minifyEnabled true  // 🔹 Shrink & optimize APK
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
             signingConfig signingConfigs.debug 
         }
     }
 }
-
-
-
-
 
 flutter {
     source = "../.."

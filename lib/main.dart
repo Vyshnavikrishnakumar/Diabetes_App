@@ -43,6 +43,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const AuthPage(),
+        //'signup': (context) => const SignUpPage(),
         'main': (context) => const MainLayout(),
       },
       onGenerateRoute: (settings) {

@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 import time
 
 # Flask server URL (updated to match your IP and port)
-BASE_URL = "http://192.168.182.185:5001/conc_number"
+BASE_URL = "http://192.168.231.185:5001/conc_number"
 
 # Initialize lists to store the data
 timestamps = []

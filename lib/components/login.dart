@@ -141,7 +141,7 @@ class _LoginFormState extends State<LoginForm> {
 
       final email = _emailController.text.trim().toLowerCase();
       final password = _passController.text.trim();
-      const url = 'http://192.168.182.185:5001/login'; // Flask backend URL
+      const url = 'http://192.168.231.185:5001/login'; // Flask backend URL
 
       try {
         final response = await http.post(

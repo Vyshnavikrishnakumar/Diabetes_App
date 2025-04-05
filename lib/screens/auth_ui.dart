@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phase_1_app/components/login.dart';
+import 'package:phase_1_app/components/signup.dart'; 
 import 'package:phase_1_app/utils/config.dart';
 import 'package:phase_1_app/utils/text.dart';
 
@@ -11,6 +12,8 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
+  bool isLogin = true; 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,38 +58,35 @@ class _AuthPageState extends State<AuthPage> {
                 ),
                 Config.spaceSmall,
 
-                // Login Form
-                LoginForm(textFieldColor: Colors.white.withOpacity(0.9)), 
+                // Toggle between Login & Sign Up Forms
+                isLogin
+                    ? LoginForm(textFieldColor: Colors.white.withOpacity(0.9))
+                    : SignupForm(
+                        textFieldColor: Colors.white.withOpacity(0.9),
+                        onSignUpSuccess: () {
+                          setState(() {
+                            isLogin = true; // Switch to Login page after successful signup
+                          });
+                        },
+                      ),
 
                 Config.spaceSmall,
                 Center(
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        isLogin = !isLogin; // Toggle the form
+                      });
+                    },
                     child: Text(
-                      AppText.enText['forgot-password']!,
+                      isLogin
+                          ? "Don't have an account? Sign Up"
+                          : "Already have an account? Sign In",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                    ),
-                  ),
-                ),
-                Config.spaceSmall,
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                    ),
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ),

@@ -126,7 +126,7 @@ class _FastCheckPageState extends State<FastCheckPage> {
       inputValues.add(double.parse(sweating));
       inputValues.add(double.parse(shivering));
 
-      var url = 'http://192.168.182.185:5001/predict';
+      var url = 'http://192.168.231.185:5001/predict';
 
       var response = await http.post(
         Uri.parse(url),

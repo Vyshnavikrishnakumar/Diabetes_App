@@ -30,14 +30,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_sms: ^2.3.3
+  #flutter_sms: ^2.3.3
+  #flutter_sms_inbox: ^1.0.2
+  #vishnu changes
   csv: any
   fl_chart: ^0.70.1
   intl: ^0.20.1
   font_awesome_flutter: ^10.6.0
   transparent_image: ^2.0.1
   flutter_launcher_icons: ^0.14.2
-
+ # firebase_core: latest
+  #firebase_auth: latest
 
 
   # The following adds the Cupertino Icons font to your application.
